@@ -1,7 +1,7 @@
 from pathlib import Path
 import io
 
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -13,9 +13,13 @@ from src.api.schemas import PredictionResponse
 
 app = FastAPI(
     title="LungVision AI API",
-    description="Explainable Multi-Class Chest X-ray Classification",
+    description="Explainable Multi-Label Chest X-ray Disease Classification",
     version="1.0.0"
 )
+
+# ---------------------------------------------------------
+# CORS
+# ---------------------------------------------------------
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,6 +28,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ---------------------------------------------------------
+# Grad-CAM Directory
+# ---------------------------------------------------------
 
 Path("artifacts/gradcam").mkdir(
     parents=True,
@@ -36,6 +44,9 @@ app.mount(
     name="gradcam"
 )
 
+# ---------------------------------------------------------
+# Routes
+# ---------------------------------------------------------
 
 @app.get("/")
 def home():
@@ -61,12 +72,21 @@ async def predict(
     file: UploadFile = File(...)
 ):
 
-    image_bytes = await file.read()
+    try:
 
-    image = Image.open(
-        io.BytesIO(image_bytes)
-    ).convert("RGB")
+        image_bytes = await file.read()
 
-    result = predictor.predict(image)
+        image = Image.open(
+            io.BytesIO(image_bytes)
+        ).convert("RGB")
 
-    return result
+        result = predictor.predict(image)
+
+        return result
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Prediction failed: {str(e)}"
+        )

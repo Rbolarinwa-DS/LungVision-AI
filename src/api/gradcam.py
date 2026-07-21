@@ -14,8 +14,8 @@ class GradCAMGenerator:
         self.gradients = None
         self.activations = None
 
-        self.target_layer = (self.model.model.features[-1])
-
+        # Last EfficientNet feature block
+        self.target_layer = self.model.model.features[-1]
 
         self.target_layer.register_forward_hook(
             self.save_activation
@@ -28,7 +28,7 @@ class GradCAMGenerator:
     def save_activation(
         self,
         module,
-        input,
+        inputs,
         output
     ):
 
@@ -62,26 +62,24 @@ class GradCAMGenerator:
 
         activations = self.activations[0]
 
-        weights = gradients.mean(
-            dim=(1, 2)
-        )
+        weights = gradients.mean(dim=(1, 2))
 
         cam = torch.zeros(
             activations.shape[1:],
+            dtype=torch.float32,
             device=activations.device
         )
 
-        for i, w in enumerate(weights):
+        for weight, activation in zip(weights, activations):
 
-            cam += w * activations[i]
+            cam += weight * activation
 
         cam = torch.relu(cam)
 
         cam -= cam.min()
 
-        cam /= (
-            cam.max() + 1e-8
-        )
+        if cam.max() > 0:
+            cam /= cam.max()
 
         cam = cam.cpu().numpy()
 
@@ -93,9 +91,7 @@ class GradCAMGenerator:
             )
         )
 
-        heatmap = np.uint8(
-            255 * cam
-        )
+        heatmap = np.uint8(255 * cam)
 
         heatmap = cv2.applyColorMap(
             heatmap,
@@ -120,6 +116,4 @@ class GradCAMGenerator:
             cv2.COLOR_BGR2RGB
         )
 
-        return Image.fromarray(
-            overlay
-        )
+        return Image.fromarray(overlay)

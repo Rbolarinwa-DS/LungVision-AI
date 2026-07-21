@@ -1,5 +1,6 @@
 from pathlib import Path
 import uuid
+
 import numpy as np
 import torch
 from PIL import Image
@@ -7,8 +8,8 @@ from PIL import Image
 from src.model import create_model
 from src.data.dataset import valid_transform
 from src.utils import TARGET_DISEASES
-
 from src.api.gradcam import GradCAMGenerator
+
 
 DEVICE = torch.device(
     "cuda" if torch.cuda.is_available() else "cpu"
@@ -23,11 +24,17 @@ class Predictor:
 
     def __init__(self):
 
+        if not MODEL_PATH.exists():
+            raise FileNotFoundError(
+                f"Model not found: {MODEL_PATH}"
+            )
+
         self.model = create_model()
 
         checkpoint = torch.load(
             MODEL_PATH,
-            map_location=DEVICE
+            map_location=DEVICE,
+            weights_only=False
         )
 
         self.model.load_state_dict(
@@ -43,7 +50,7 @@ class Predictor:
             self.model
         )
 
-    def predict(self, image):
+    def predict(self, image: Image.Image):
 
         original_image = image.convert("RGB")
 
@@ -57,7 +64,7 @@ class Predictor:
             .to(DEVICE)
         )
 
-        with torch.no_grad():
+        with torch.inference_mode():
 
             logits = self.model(image_tensor)
 
@@ -65,25 +72,26 @@ class Predictor:
                 logits
             )[0].cpu().numpy()
 
-        predictions = {}
-
         highest_class = int(
             np.argmax(probabilities)
         )
 
-        for disease, probability in zip(
-            TARGET_DISEASES,
-            probabilities
-        ):
+        predictions = {}
+
+        ranked = sorted(
+            zip(TARGET_DISEASES, probabilities),
+            key=lambda x: x[1],
+            reverse=True
+        )
+
+        for disease, probability in ranked:
 
             predictions[disease] = {
                 "probability": round(
                     float(probability),
                     4
                 ),
-                "detected": bool(
-                    probability >= THRESHOLD
-                )
+                "detected": probability >= THRESHOLD
             }
 
         gradcam_image = self.gradcam.generate(
@@ -101,9 +109,7 @@ class Predictor:
             exist_ok=True
         )
 
-        filename = (
-            uuid.uuid4().hex + ".png"
-        )
+        filename = f"{uuid.uuid4().hex}.png"
 
         save_path = output_dir / filename
 

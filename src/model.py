@@ -19,10 +19,8 @@ class LungVisionModel(nn.Module):
 
         super().__init__()
 
-        self.model = efficientnet_b0(
-            weights=EfficientNet_B0_Weights.DEFAULT
-        )
-
+        self.model = efficientnet_b0(weights=None)
+        
         in_features = self.model.classifier[1].in_features
 
         self.model.classifier = nn.Sequential(

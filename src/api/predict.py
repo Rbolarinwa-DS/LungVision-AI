@@ -1,5 +1,6 @@
 from pathlib import Path
 import uuid
+import time
 
 import numpy as np
 import torch
@@ -52,6 +53,13 @@ class Predictor:
 
     def predict(self, image: Image.Image):
 
+        total_start = time.perf_counter()
+
+        # ---------------------------------
+        # Preprocessing
+        # ---------------------------------
+        t = time.perf_counter()
+
         original_image = image.convert("RGB")
 
         transformed = self.transforms(
@@ -64,6 +72,15 @@ class Predictor:
             .to(DEVICE)
         )
 
+        print(
+            f"[TIMING] Preprocess: {time.perf_counter() - t:.3f}s"
+        )
+
+        # ---------------------------------
+        # Inference
+        # ---------------------------------
+        t = time.perf_counter()
+
         with torch.inference_mode():
 
             logits = self.model(image_tensor)
@@ -71,6 +88,15 @@ class Predictor:
             probabilities = torch.sigmoid(
                 logits
             )[0].cpu().numpy()
+
+        print(
+            f"[TIMING] Inference: {time.perf_counter() - t:.3f}s"
+        )
+
+        # ---------------------------------
+        # Prediction formatting
+        # ---------------------------------
+        t = time.perf_counter()
 
         highest_class = int(
             np.argmax(probabilities)
@@ -94,11 +120,29 @@ class Predictor:
                 "detected": probability >= THRESHOLD
             }
 
+        print(
+            f"[TIMING] Formatting: {time.perf_counter() - t:.3f}s"
+        )
+
+        # ---------------------------------
+        # GradCAM
+        # ---------------------------------
+        t = time.perf_counter()
+
         gradcam_image = self.gradcam.generate(
             image_tensor=image_tensor,
             original_image=original_image,
             class_index=highest_class
         )
+
+        print(
+            f"[TIMING] GradCAM: {time.perf_counter() - t:.3f}s"
+        )
+
+        # ---------------------------------
+        # Save image
+        # ---------------------------------
+        t = time.perf_counter()
 
         output_dir = Path(
             "artifacts/gradcam"
@@ -115,10 +159,20 @@ class Predictor:
 
         gradcam_image.save(save_path)
 
+        print(
+            f"[TIMING] Save Image: {time.perf_counter() - t:.3f}s"
+        )
+
+        # ---------------------------------
+        # Total
+        # ---------------------------------
+        print(
+            f"[TIMING] TOTAL: {time.perf_counter() - total_start:.3f}s"
+        )
+
         return {
             "predictions": predictions,
             "gradcam": f"/gradcam/{filename}"
         }
-
 
 predictor = Predictor()

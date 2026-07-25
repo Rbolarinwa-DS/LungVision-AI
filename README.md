@@ -341,7 +341,7 @@ It helps support the project and motivates future development.
 
 # 👨‍💻 Author
 
-**Rmzy**
+**Rahman-Bolarinwa**
 
 Machine Learning Engineer • Data Scientist
 

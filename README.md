@@ -1,84 +1,149 @@
+<p align="center">
+
+<img src="docs/banner.png" width="100%"/>
+
 # 🫁 LungVision AI
 
-> **Explainable Multi-Label Chest X-ray Disease Classification using Deep Learning**
+### AI-Powered Explainable Chest X-ray Disease Classification
 
-LungVision AI is an end-to-end medical AI application designed to detect multiple thoracic diseases from chest X-ray images using transfer learning and explainable artificial intelligence (XAI). The system leverages EfficientNet-B0 for feature extraction, FastAPI for deployment, and Grad-CAM to visualize the image regions influencing each prediction.
+Detect thoracic diseases from Chest X-rays using **EfficientNet-B0** and visualize AI predictions with **Grad-CAM Explainability**.
 
----
+Built with **PyTorch**, **FastAPI**, **Docker**, **Railway**, and **Lovable**.
 
-# Project Overview
+[🌐 Live Demo](https://lungvision-ai-clarity.lovable.app/) • [📖 API Docs](https://lungvision-ai-backend-production.up.railway.app/docs)
 
-Early diagnosis of thoracic diseases through chest radiography remains one of the most important tasks in modern healthcare. Interpreting chest X-rays requires significant clinical expertise and can be time-consuming.
-
-LungVision AI assists this process by automatically identifying multiple chest abnormalities from a single X-ray image while providing visual explanations to improve transparency and trust in model predictions.
-
-The application predicts the presence of the following diseases:
-
-- Atelectasis
-- Consolidation
-- Effusion
-- Infiltration
-- Mass
-- Nodule
-- Pneumothorax
-
-Unlike traditional single-label classifiers, LungVision AI performs **multi-label classification**, allowing multiple diseases to be detected simultaneously from a single radiograph.
+</p>
 
 ---
 
-# Features
+# 🎥 Live Demo
 
-- Multi-label chest X-ray disease classification
-- EfficientNet-B0 Transfer Learning
-- Grad-CAM Explainability
-- FastAPI REST API
-- Production-ready inference pipeline
-- Confidence scores for every disease
-- Interactive API documentation (Swagger)
-- Optimized inference using PyTorch
+<p align="center">
+
+<img src="docs/demo.mp4" width="100%"/>
+
+</p>
 
 ---
 
-# Project Architecture
+# 📸 Application Preview
 
-```
-                Chest X-ray
-                     │
-                     ▼
-          Image Preprocessing
-                     │
-                     ▼
-          EfficientNet-B0 Backbone
-                     │
-                     ▼
-          Multi-label Classifier Head
-                     │
-      ┌──────────────┴──────────────┐
-      ▼                             ▼
- Disease Probabilities         Grad-CAM Heatmap
-      ▼                             ▼
-           FastAPI REST API
-                     │
-                     ▼
-               Frontend Client
-```
+## 🏠 Landing Page
+
+<p align="center">
+
+<img src="docs/landing-page.png" width="100%"/>
+
+</p>
 
 ---
 
-# Dataset
+## 🤖 AI Prediction Report
+
+<p align="center">
+
+<img src="docs/prediction-page.png" width="100%"/>
+
+</p>
+
+---
+
+## 🔥 Grad-CAM Explainability
+
+<p align="center">
+
+<img src="docs/gradcam-page.png" width="100%"/>
+
+</p>
+
+---
+
+## Clinical report
+
+<p align="center">
+
+<img src="docs/mobile-view.png" width="35%"/>
+
+</p>
+
+---
+
+# 📖 Overview
+
+LungVision AI is an end-to-end Deep Learning application that automatically analyzes Chest X-ray images to detect thoracic diseases while explaining every prediction using **Grad-CAM**.
+
+The project demonstrates the complete Machine Learning lifecycle—from dataset preparation and model training to deployment through FastAPI, Docker, Railway, and a modern Lovable frontend.
+
+---
+
+# 🚀 Features
+
+- 🧠 EfficientNet-B0 Transfer Learning
+- 🔥 Explainable AI (Grad-CAM)
+- 🩻 Detects **7 Thoracic Diseases**
+- ⚡ FastAPI REST API
+- 🐳 Dockerized Deployment
+- ☁️ Railway Hosted Backend
+- 💜 Modern Responsive UI
+- 📱 Mobile Friendly
+- 📊 Clinical Report Generation
+
+---
+
+# 💡 Why LungVision AI?
+
+Chest X-ray interpretation is time-consuming and requires expert knowledge.
+
+LungVision AI demonstrates how Explainable Artificial Intelligence can assist healthcare professionals by:
+
+- Providing rapid preliminary analysis
+- Supporting clinical decision-making
+- Highlighting important image regions using Grad-CAM
+- Demonstrating production-ready deployment of Medical AI
+
+LungVision AI is designed as an **AI-assisted decision support system**, not a replacement for radiologists.
+
+---
+
+# 📚 Dataset Summary
 
 **Dataset**
 
-NIH ChestX-ray14
+NIH ChestXray14
 
-Original Dataset:
+- 112,120 frontal Chest X-ray images
+- Public dataset released by the National Institutes of Health (NIH)
+- One of the largest publicly available Chest X-ray datasets
 
-- 112,120 Chest X-ray Images
-- 30,000+ Patients
+For LungVision AI, the dataset was filtered to train on **7 thoracic diseases**:
 
-For this project, the dataset was filtered to include only seven clinically relevant thoracic diseases.
+- Atelectasis
+- Consolidation
+- Effusion
+- Infiltration
+- Mass
+- Nodule
+- Pneumothorax
 
-Selected Diseases:
+Images were resized to **224×224** and augmented using **Albumentations** before training.
+
+---
+
+# 📈 Model Performance
+
+| Metric | Score |
+|---------|-------|
+| Macro F1 Score | **0.4425** |
+| Precision | **0.3352** |
+| Recall | **0.7149** |
+| Architecture | EfficientNet-B0 |
+| Framework | PyTorch |
+
+The model prioritizes **high recall** to reduce the chance of missing clinically significant thoracic abnormalities.
+
+---
+
+# 🦠 Detectable Diseases
 
 - Atelectasis
 - Consolidation
@@ -90,208 +155,97 @@ Selected Diseases:
 
 ---
 
-# Model Architecture
-
-Backbone:
-
-- EfficientNet-B0
-- ImageNet Pretrained Weights
-
-Classifier Head:
-
-```
-EfficientNet Features
-        │
-Linear (1280 → 512)
-BatchNorm
-ReLU
-Dropout(0.4)
-
-        │
-Linear (512 → 256)
-BatchNorm
-ReLU
-Dropout(0.3)
-
-        │
-Linear (256 → 7)
-Sigmoid
-```
-
-Loss Function:
-
-- BCEWithLogitsLoss
-
-Optimizer:
-
-- AdamW
-
-Regularization:
-
-- Weight Decay
-- Dropout
-- Batch Normalization
-
----
-
-# Data Augmentation
-
-Training images undergo several augmentation techniques:
-
-- Horizontal Flip
-- Random Brightness & Contrast
-- Shift
-- Scale
-- Rotation
-- CLAHE
-- Gaussian Blur
-- Gaussian Noise
-- ImageNet Normalization
-
----
-
-# Evaluation
-
-Evaluation Metric:
-
-Primary Metric:
-
-- Macro F1 Score
-
-Additional Metrics:
-
-- Precision
-- Recall
-- Classification Report
-- Multi-label Confusion Matrix
-
-## Final Test Results
-
-| Metric | Score |
-|---------|--------|
-| Precision | **0.3352** |
-| Recall | **0.7149** |
-| Macro F1 | **0.4425** |
-
----
-
-# Per-Class Performance
-
-| Disease | Precision | Recall | F1 |
-|----------|----------:|-------:|------:|
-| Atelectasis | 0.36 | 0.74 | 0.48 |
-| Consolidation | 0.15 | 0.80 | 0.25 |
-| Effusion | 0.52 | 0.81 | 0.63 |
-| Infiltration | 0.51 | 0.75 | 0.60 |
-| Mass | 0.21 | 0.56 | 0.31 |
-| Nodule | 0.19 | 0.60 | 0.29 |
-| Pneumothorax | 0.42 | 0.75 | 0.54 |
-
----
-
-# Explainability
-
-Medical AI should not behave like a black box.
-
-LungVision AI integrates **Grad-CAM (Gradient-weighted Class Activation Mapping)** to highlight the regions of the chest X-ray that contribute most to each disease prediction.
-
-Benefits include:
-
-- Improved interpretability
-- Increased clinician trust
-- Visual validation of model attention
-- Explainable decision support
-
----
-
-# Backend
-
-Framework:
-
-- FastAPI
-
-Endpoints:
-
-```
-GET /
-```
-
-Health endpoint.
-
-```
-POST /predict
-```
-
-Upload a chest X-ray image and receive:
-
-- Disease probabilities
-- Disease predictions
-- Grad-CAM visualization
-
----
-
-# Tech Stack
+# 🏗️ Technology Stack
 
 ### Machine Learning
 
 - PyTorch
 - Torchvision
-- NumPy
-- Pandas
-- Scikit-Learn
-
-### Computer Vision
-
+- EfficientNet-B0
 - OpenCV
 - Albumentations
-- Pillow
-
-### Explainability
-
-- Grad-CAM
+- NumPy
+- Pandas
 
 ### Backend
 
 - FastAPI
 - Uvicorn
+- Pydantic
+
+### Frontend
+
+- Lovable
+- React
+- TypeScript
+- TailwindCSS
+- Framer Motion
 
 ### Deployment
 
-- Render
+- Docker
+- Railway
 
 ---
 
-# Project Structure
+# 📂 Project Structure
 
-```
-LungVision-AI
-│
+```text
+LungVision-AI/
+
 ├── artifacts/
 │   ├── best_model.pth
-│   └── training_curves.png
+│   └── gradcam/
+│
+├── docs/
 │
 ├── src/
-│   ├── api/
-│   ├── data/
-│   ├── model.py
-│   ├── train.py
-│   ├── evaluate.py
-│   └── utils.py
 │
+├── Dockerfile
 ├── requirements.txt
-├── runtime.txt
-├── render.yaml
-└── README.md
+├── README.md
+└── render.yaml
 ```
 
 ---
 
-# Running Locally
+# 📡 API
+
+### Health Check
+
+```http
+GET /health
+```
+
+### Prediction
+
+```http
+POST /predict
+```
+
+Upload
+
+```text
+file = Chest X-ray Image
+```
+
+Returns
+
+```json
+{
+  "predictions": {},
+  "gradcam": "/gradcam/example.png"
+}
+```
+
+---
+
+# ⚙️ Run Locally
 
 Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/LungVision-AI.git
+git clone https://github.com/YOUR_USERNAME/LungVision-AI.git
 ```
 
 Install dependencies
@@ -314,41 +268,81 @@ http://127.0.0.1:8000/docs
 
 ---
 
-# Future Improvements
+# 🐳 Docker
 
-- Support additional thoracic diseases
-- Threshold optimization per disease
-- Model ensembling
-- DICOM image support
-- Docker containerization
-- Authentication
-- Cloud deployment optimization
-- Model monitoring
-- Clinical validation
+Build
 
----
+```bash
+docker build -t lungvision-ai .
+```
 
-# Limitations
+Run
 
-- Trained on the NIH ChestX-ray14 dataset.
-- Performance varies across disease classes due to dataset imbalance.
-- Some thoracic diseases exhibit overlapping radiographic characteristics, making differentiation challenging.
-- Intended as a decision-support tool and **not** a replacement for professional medical diagnosis.
+```bash
+docker run -p 8080:8080 lungvision-ai
+```
 
 ---
 
-# License
+# ⚠️ Current Limitations
 
-This project is intended for educational and research purposes.
+Although LungVision AI demonstrates a production-ready deployment workflow, there are still limitations.
+
+- Supports only frontal Chest X-rays
+- Detects exactly seven thoracic diseases
+- Does not currently reject non–Chest X-ray images
+- No DICOM image support
+- Intended for educational and research purposes
+- Not a substitute for professional medical diagnosis
 
 ---
 
-# Author
+# 🛣️ Roadmap
 
-**Rahman Bolarinwa**
+## ✅ Version 1.0
 
-Machine Learning Engineer
+- End-to-End Deployment
+- EfficientNet-B0 Classification
+- Grad-CAM Explainability
+- Railway Backend
+- Docker Support
+- Responsive Frontend
 
-- GitHub: https://github.com/Rbolarinwa-DS
-- x handle :https//x.com/R_mzy001
-- 
+### 🚀 Version 2.0
+
+- ✅ Chest X-ray Validator (Reject Non-X-ray Images)
+- DICOM Support
+- PDF Clinical Report Export
+- Confidence Calibration
+- Out-of-Distribution Detection
+- User Authentication
+- Patient Dashboard
+- Performance Improvements
+
+---
+
+# 📜 Medical Disclaimer
+
+LungVision AI is intended for **educational, research, and demonstration purposes only.**
+
+It should **not** replace licensed healthcare professionals or clinical judgment.
+
+Always consult qualified medical personnel before making healthcare decisions.
+
+---
+
+# ⭐ Support
+
+If you found this project useful, consider giving it a **Star ⭐**.
+
+It helps support the project and motivates future development.
+
+---
+
+# 👨‍💻 Author
+
+**Rmzy**
+
+Machine Learning Engineer • Data Scientist
+
+Building practical AI solutions from research to deployment.

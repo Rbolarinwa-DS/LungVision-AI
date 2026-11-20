@@ -1,5 +1,7 @@
+
 from pathlib import Path
-import uuid
+import base64
+import io
 import time
 
 import numpy as np
@@ -7,7 +9,7 @@ import torch
 from PIL import Image
 
 from src.model import create_model
-from src.data.dataset import valid_transform
+from src.api.transforms import valid_transform
 from src.utils import TARGET_DISEASES
 from src.api.gradcam import GradCAMGenerator
 
@@ -16,7 +18,8 @@ DEVICE = torch.device(
     "cuda" if torch.cuda.is_available() else "cpu"
 )
 
-MODEL_PATH = Path("artifacts/best_model.pth")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+MODEL_PATH = PROJECT_ROOT / "artifacts" / "best_model.pth"
 
 THRESHOLD = 0.45
 
@@ -55,9 +58,7 @@ class Predictor:
 
         total_start = time.perf_counter()
 
-        # ---------------------------------
         # Preprocessing
-        # ---------------------------------
         t = time.perf_counter()
 
         original_image = image.convert("RGB")
@@ -76,9 +77,7 @@ class Predictor:
             f"[TIMING] Preprocess: {time.perf_counter() - t:.3f}s"
         )
 
-        # ---------------------------------
         # Inference
-        # ---------------------------------
         t = time.perf_counter()
 
         with torch.inference_mode():
@@ -93,9 +92,7 @@ class Predictor:
             f"[TIMING] Inference: {time.perf_counter() - t:.3f}s"
         )
 
-        # ---------------------------------
         # Prediction formatting
-        # ---------------------------------
         t = time.perf_counter()
 
         highest_class = int(
@@ -124,9 +121,7 @@ class Predictor:
             f"[TIMING] Formatting: {time.perf_counter() - t:.3f}s"
         )
 
-        # ---------------------------------
-        # GradCAM
-        # ---------------------------------
+        # Grad-CAM
         t = time.perf_counter()
 
         gradcam_image = self.gradcam.generate(
@@ -139,40 +134,36 @@ class Predictor:
             f"[TIMING] GradCAM: {time.perf_counter() - t:.3f}s"
         )
 
-        # ---------------------------------
-        # Save image
-        # ---------------------------------
+        # Encode Grad-CAM image in memory
         t = time.perf_counter()
 
-        output_dir = Path(
-            "artifacts/gradcam"
+        image_buffer = io.BytesIO()
+
+        gradcam_image.save(
+            image_buffer,
+            format="PNG"
         )
 
-        output_dir.mkdir(
-            parents=True,
-            exist_ok=True
+        image_base64 = base64.b64encode(
+            image_buffer.getvalue()
+        ).decode("ascii")
+
+        gradcam_data_uri = (
+            f"data:image/png;base64,{image_base64}"
         )
-
-        filename = f"{uuid.uuid4().hex}.png"
-
-        save_path = output_dir / filename
-
-        gradcam_image.save(save_path)
 
         print(
-            f"[TIMING] Save Image: {time.perf_counter() - t:.3f}s"
+            f"[TIMING] Image encoding: {time.perf_counter() - t:.3f}s"
         )
 
-        # ---------------------------------
-        # Total
-        # ---------------------------------
         print(
             f"[TIMING] TOTAL: {time.perf_counter() - total_start:.3f}s"
         )
 
         return {
             "predictions": predictions,
-            "gradcam": f"/gradcam/{filename}"
+            "gradcam": gradcam_data_uri
         }
+
 
 predictor = Predictor()
